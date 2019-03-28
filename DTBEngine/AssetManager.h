@@ -13,7 +13,6 @@ public:
 	static sf::Texture & GetTexture(std::string const &);
 	static sf::SoundBuffer & GetSoundBuffer(std::string const &);
 	static sf::Font & GetFont(std::string const &);
-	static sf::Shader & GetShader(std::string const &, std::string const &);
 private:
 	std::map<std::string, sf::SoundBuffer> m_SoundBuffers;
 	std::map<std::string, sf::Font> m_Fonts;
