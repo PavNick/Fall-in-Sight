@@ -15,47 +15,53 @@ enum PlayerState {
 
 class Player
 {
-	AssetManager *manager;
-	sf::Sprite pSprite;
-	bool onGround;
-	b2BodyDef pbdef;
-	b2PolygonShape pShape;
-	b2Body *pBody;
-	b2Vec2 spawnPoint;
-	b2World *world;
-	PlayerState currentState;
+	AssetManager *manager;		// Assets (textures, sounds)
+	sf::Sprite pSprite;			// Sprite for draw
+	bool onGround;				// Check intersects ground
+	b2BodyDef pbdef;			// Body definitions
+	b2PolygonShape pShape;		// Body shape
+	b2Body *pBody;				// Body
+	b2Vec2 spawnPoint;			// Point spawn on map
+	b2World *world;				// Pointer to main gameworld
+	PlayerState currentState;	// player current state
 
 	void initModel()
 	{	
-		// Physics
+		// -----Physics
 
-		pbdef.type = b2_dynamicBody;					//
-		pbdef.userData = (void*)"player";				// Body setup
-		pbdef.position.Set(spawnPoint.x, spawnPoint.y);	//
+		// Body setup
 
-		pShape.SetAsBox(12.0f / SCALE, 18.0f / SCALE);	// Player shape setup
+		pbdef.type = b2_dynamicBody;
+		pbdef.userData = (void*)"player";
+		pbdef.position.Set(spawnPoint.x, spawnPoint.y);
 
-		pBody = world->CreateBody(&pbdef);				//
-		pBody->CreateFixture(&pShape, 2.0f);			// Load shape in body and add to World
-		pBody->SetUserData((void*)"player");			//
+		// Player shape setup
 
-		// Visuals
+		pShape.SetAsBox(12.0f / SCALE, 18.0f / SCALE);
+
+		// Load shape in body and add to World
+
+		pBody = world->CreateBody(&pbdef);
+		pBody->CreateFixture(&pShape, 2.0f);
+		pBody->SetUserData((void*)"player");
+
+		// -----Visuals
 
 		pSprite.setTexture(manager->GetTexture("player.png"));	// Load texture to Sprite
 		pSprite.setTextureRect(sf::IntRect(0, 0, 12, 18));		// Cut texture for render
 	}
 
 public:
-	Player(b2World *w, b2Vec2 &sp, AssetManager *man) : manager(man)
+	Player(b2World *w, b2Vec2 &sp, AssetManager *man) : manager(man) // Constructor
 	{
 		currentState = PlayerState::Stay;
 		world = w;
 		spawnPoint = sp;
 		initModel();
-
+		// todo
 	}
 
-	void updateEvent(sf::Event *ev)
+	void updateEvent(sf::Event *ev) // For moving, shooting and more
 	{
 		if (ev->type == sf::Event::KeyPressed)
 		{
@@ -69,8 +75,13 @@ public:
 		}
 	}
 
-	void update(float deltaTime, sf::RenderWindow *window)
+	void update(float deltaTime) // update gametick
 	{
 		
+	}
+
+	void draw(sf::RenderWindow *window) // render player on display
+	{
+
 	}
 };
