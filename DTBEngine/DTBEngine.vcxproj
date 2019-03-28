@@ -176,6 +176,7 @@
     <ClCompile Include="bin\ImGui\imgui_widgets.cpp" />
     <ClCompile Include="DTBEngine.cpp" />
     <ClCompile Include="AssetManager.cpp" />
+    <ClCompile Include="TestCodeLearning.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="bin\content\textures\tileset0.png" />

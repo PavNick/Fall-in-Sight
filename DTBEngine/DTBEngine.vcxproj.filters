@@ -86,6 +86,9 @@
     <ClCompile Include="AssetManager.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="TestCodeLearning.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="bin\content\textures\tileset0.png">
