@@ -94,7 +94,6 @@ public:
 
 		// test
 
-		setWall(0, 500, 800, 10);
 
 	}
 
