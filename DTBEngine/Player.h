@@ -49,17 +49,23 @@ class Player
 		pbdef.type = b2_dynamicBody;
 		pbdef.userData = (void*)"player";
 		pbdef.position.Set(spawnPoint.x, spawnPoint.y);
+		pbdef.fixedRotation = true;
 		
 
 		// Player shape setup
 
 		pShape.SetAsBox((10.0f * 5) / SCALE, (15.0f * 5) / SCALE);
+
+		b2FixtureDef fixtureDef;
+		fixtureDef.shape = &pShape;
+		fixtureDef.density = 1.3f;
+		fixtureDef.friction = 2.6f;
 		
 
 		// Load shape in body and add to World
 
 		pBody = world->CreateBody(&pbdef);
-		pBody->CreateFixture(&pShape, 2.8f);
+		pBody->CreateFixture(&fixtureDef);
 		pBody->SetUserData((void*)"player");
 
 		// -----Visuals
@@ -67,7 +73,6 @@ class Player
 		pSprite.setTexture(manag->GetTexture("player.png"));	// Load texture to Sprite
 		pSprite.setTextureRect(sf::IntRect(0, 0, 10, 15));		// Cut texture for render
 		pSprite.setScale(5, 5);
-		pSprite.setOrigin(5, 7.5);
 	}
 
 public:
@@ -107,52 +112,45 @@ public:
 				currentState = PlayerState::Jump;
 				break;
 			default:
-				currentState = PlayerState::Stay;
 				break;
 			}
 		}
+		else if (ev->type == sf::Event::KeyReleased) currentState = PlayerState::Stay;
 	}
 
 	void setStay() { currentState = PlayerState::Stay; }
 
 	void update(float deltaTime) // update gametick
 	{
-		bool onGround = true;
-		/*
+		// Ground intersects
+
+		bool onGround = false;
 		b2Vec2 pos = pBody->GetPosition();
-		pos.y += 16 / SCALE;
+		pos.y += 15.1 * 5 / SCALE;
 		for (b2Body *it = world->GetBodyList(); it != 0; it = it->GetNext())
-			for (b2Fixture *itf = it->GetFixtureList(); itf != 0; itf = itf->GetNext())
-				if (itf->TestPoint(pos)) onGround = true;*/
+			if (it->GetUserData() != "player") 
+				for (b2Fixture *itf = it->GetFixtureList(); itf != 0; itf = itf->GetNext())
+					if (itf->TestPoint(pos)) onGround = true;
+
+		// moving
 
 		b2Vec2 velocity = pBody->GetLinearVelocity();
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) if (velocity.x < 200) pBody->ApplyForceToCenter(b2Vec2(-2400, 0), 1);
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) if (velocity.x > -200) pBody->ApplyForceToCenter(b2Vec2(2400, 0), 1);
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) if (onGround) pBody->ApplyForceToCenter(b2Vec2(0, -240), 1);
-
-		if (velocity.x > 0)
+		switch (currentState)
 		{
-			pBody->SetLinearVelocity(b2Vec2(pBody->GetLinearVelocity().x - 0.5, pBody->GetLinearVelocity().y));
+		case PlayerState::MoveRight:
+			if (velocity.x > -20) pBody->ApplyLinearImpulseToCenter(b2Vec2(5, 0), 1);	// Force
+			pSprite.setTextureRect(sf::IntRect(0, 0, 10, 15));							// Visual
+			break;
+		case PlayerState::MoveLeft:
+			if (velocity.x < 20) pBody->ApplyLinearImpulseToCenter(b2Vec2(-5, 0), 1);
+			pSprite.setTextureRect(sf::IntRect(10, 0, -10, 15));
+			break;
+		case PlayerState::Jump:
+			if (onGround) pBody->ApplyLinearImpulseToCenter(b2Vec2(0, -150), 1);
+			break;
+		default:
+			break;
 		}
-
-
-		//switch (currentState)
-		//{
-		//case PlayerState::MoveRight:
-		//	if (velocity.x > -20) pBody->ApplyForceToCenter(b2Vec2(24, 0), 1);	// Force
-		//	pSprite.setTextureRect(sf::IntRect(0, 0, 10, 15));					// Visual
-		//	break;
-		//case PlayerState::MoveLeft:
-		//	if (velocity.x < 20) pBody->ApplyForceToCenter(b2Vec2(-24, 0), 1);
-		//	pSprite.setTextureRect(sf::IntRect(10, 0, -10, 15));
-		//	break;
-		//case PlayerState::Jump:
-		//	if (onGround) pBody->ApplyLinearImpulseToCenter(b2Vec2(0, -15), 1);
-		//	break;
-		//default:
-		//	break;
-		//}
-		//setStay();
 	}
 
 	void draw(sf::RenderWindow *window) // render player on display
