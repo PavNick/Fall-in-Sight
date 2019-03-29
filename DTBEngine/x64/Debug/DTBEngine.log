@@ -1,4 +1,5 @@
 ﻿  DTBEngine.cpp
 e:\defeatthebastards\fall-in-sight\fall-in-sight\dtbengine\animator.h(57): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
-e:\defeatthebastards\fall-in-sight\fall-in-sight\dtbengine\player.h(135): warning C4244: аргумент: преобразование "double" в "float32", возможна потеря данных
+e:\defeatthebastards\fall-in-sight\fall-in-sight\dtbengine\player.h(83): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+e:\defeatthebastards\fall-in-sight\fall-in-sight\dtbengine\player.h(135): warning C4244: +=: преобразование "double" в "float32", возможна потеря данных
   DTBEngine.vcxproj -> E:\DefeatTheBastards\Fall-in-Sight\Fall-in-Sight\x64\Debug\DTBEngine.exe

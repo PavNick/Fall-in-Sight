@@ -24,6 +24,7 @@ class Player
 	b2Vec2 spawnPoint;			// Point spawn on map
 	b2World *world;				// Pointer to main gameworld
 	PlayerState currentState;	// player current state
+	float playerScale;			// player scale
 
 	// TESTING
 
@@ -32,11 +33,16 @@ class Player
 		b2PolygonShape gr;
 		gr.SetAsBox(w / SCALE, h / SCALE);
 
+		b2FixtureDef wallfdef;
+		wallfdef.friction = 0.3f;
+		wallfdef.density = 1.0f;
+		wallfdef.shape = &gr;
+
 		b2BodyDef bdef;
 		bdef.position.Set(x / SCALE, y / SCALE);
 
 		b2Body *body_gr = world->CreateBody(&bdef);
-		body_gr->CreateFixture(&gr, 1);
+		body_gr->CreateFixture(&wallfdef);
 		body_gr->SetUserData((void*)"wall");
 	}
 
@@ -44,30 +50,37 @@ class Player
 	{	
 		// -----Physics
 
+		playerScale = 5;
+
 		// Body setup
 
 		pbdef.type = b2_dynamicBody;
 		pbdef.userData = (void*)"player";
 		pbdef.position.Set(spawnPoint.x, spawnPoint.y);
+		pbdef.fixedRotation = true;
 		
+		b2FixtureDef fdef;
+		fdef.density = 2.8f;
+		fdef.friction = 5.6f;
 
 		// Player shape setup
 
-		pShape.SetAsBox((10.0f * 5) / SCALE, (15.0f * 5) / SCALE);
+		pShape.SetAsBox((10.0f * playerScale) / SCALE, (15.0f * playerScale) / SCALE);
+		fdef.shape = &pShape;
 		
 
 		// Load shape in body and add to World
 
 		pBody = world->CreateBody(&pbdef);
-		pBody->CreateFixture(&pShape, 2.8f);
+		pBody->CreateFixture(&fdef);
 		pBody->SetUserData((void*)"player");
 
 		// -----Visuals
 
 		pSprite.setTexture(manag->GetTexture("player.png"));	// Load texture to Sprite
 		pSprite.setTextureRect(sf::IntRect(0, 0, 10, 15));		// Cut texture for render
-		pSprite.setScale(5, 5);
-		pSprite.setOrigin(5, 7.5);
+		pSprite.setScale(playerScale, playerScale);
+		pSprite.setOrigin(pSprite.getTextureRect().width / 2, pSprite.getTextureRect().height / 2);
 	}
 
 public:
@@ -107,52 +120,41 @@ public:
 				currentState = PlayerState::Jump;
 				break;
 			default:
-				currentState = PlayerState::Stay;
 				break;
 			}
 		}
+		else if (ev->type == sf::Event::KeyReleased) currentState = PlayerState::Stay;
 	}
 
 	void setStay() { currentState = PlayerState::Stay; }
 
 	void update(float deltaTime) // update gametick
 	{
-		bool onGround = true;
-		/*
+		bool onGround = false;
 		b2Vec2 pos = pBody->GetPosition();
-		pos.y += 16 / SCALE;
+		pos.y += pSprite.getTextureRect().height * playerScale / SCALE + 0.2;
 		for (b2Body *it = world->GetBodyList(); it != 0; it = it->GetNext())
-			for (b2Fixture *itf = it->GetFixtureList(); itf != 0; itf = itf->GetNext())
-				if (itf->TestPoint(pos)) onGround = true;*/
+			if (it->GetUserData() != "player") for (b2Fixture *itf = it->GetFixtureList(); itf != 0; itf = itf->GetNext())
+				if (itf->TestPoint(pos)) onGround = true;
 
 		b2Vec2 velocity = pBody->GetLinearVelocity();
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) if (velocity.x < 200) pBody->ApplyForceToCenter(b2Vec2(-2400, 0), 1);
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) if (velocity.x > -200) pBody->ApplyForceToCenter(b2Vec2(2400, 0), 1);
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) if (onGround) pBody->ApplyForceToCenter(b2Vec2(0, -240), 1);
 
-		if (velocity.x > 0)
+		switch (currentState)
 		{
-			pBody->SetLinearVelocity(b2Vec2(pBody->GetLinearVelocity().x - 0.5, pBody->GetLinearVelocity().y));
+		case PlayerState::MoveRight:
+			if (velocity.x > -10) pBody->ApplyLinearImpulseToCenter(b2Vec2(20, 0), 1);	// Force
+			pSprite.setTextureRect(sf::IntRect(0, 0, 10, 15));					// Visual
+			break;
+		case PlayerState::MoveLeft:
+			if (velocity.x < 10) pBody->ApplyLinearImpulseToCenter(b2Vec2(-20, 0), 1);
+			pSprite.setTextureRect(sf::IntRect(10, 0, -10, 15));
+			break;
+		case PlayerState::Jump:
+			if (onGround) pBody->ApplyLinearImpulseToCenter(b2Vec2(0, -240), 1);
+			break;
+		default:
+			break;
 		}
-
-
-		//switch (currentState)
-		//{
-		//case PlayerState::MoveRight:
-		//	if (velocity.x > -20) pBody->ApplyForceToCenter(b2Vec2(24, 0), 1);	// Force
-		//	pSprite.setTextureRect(sf::IntRect(0, 0, 10, 15));					// Visual
-		//	break;
-		//case PlayerState::MoveLeft:
-		//	if (velocity.x < 20) pBody->ApplyForceToCenter(b2Vec2(-24, 0), 1);
-		//	pSprite.setTextureRect(sf::IntRect(10, 0, -10, 15));
-		//	break;
-		//case PlayerState::Jump:
-		//	if (onGround) pBody->ApplyLinearImpulseToCenter(b2Vec2(0, -15), 1);
-		//	break;
-		//default:
-		//	break;
-		//}
-		//setStay();
 	}
 
 	void draw(sf::RenderWindow *window) // render player on display
