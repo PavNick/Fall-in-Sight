@@ -25,6 +25,7 @@ class Player
 	b2World *world;				// Pointer to main gameworld
 	PlayerState currentState;	// player current state
 	float playerScale;			// player scale
+	sf::IntRect playerRect;		// player rect
 
 	// TESTING
 
@@ -51,6 +52,7 @@ class Player
 		// -----Physics
 
 		playerScale = 5;
+		playerRect = sf::IntRect(0, 0, 12, 22);
 
 		// Body setup
 
@@ -60,12 +62,12 @@ class Player
 		pbdef.fixedRotation = true;
 		
 		b2FixtureDef fdef;
-		fdef.density = 2.8f;
+		fdef.density = 1.8f;
 		fdef.friction = 5.6f;
 
 		// Player shape setup
 
-		pShape.SetAsBox((10.0f * playerScale) / SCALE, (15.0f * playerScale) / SCALE);
+		pShape.SetAsBox((playerRect.width * playerScale) / SCALE, (playerRect.height * playerScale) / SCALE);
 		fdef.shape = &pShape;
 		
 
@@ -78,7 +80,7 @@ class Player
 		// -----Visuals
 
 		pSprite.setTexture(manag->GetTexture("player.png"));	// Load texture to Sprite
-		pSprite.setTextureRect(sf::IntRect(0, 0, 10, 15));		// Cut texture for render
+		pSprite.setTextureRect(playerRect);		// Cut texture for render
 		pSprite.setScale(playerScale, playerScale);
 		pSprite.setOrigin(pSprite.getTextureRect().width / 2, pSprite.getTextureRect().height / 2);
 	}
@@ -141,12 +143,12 @@ public:
 		switch (currentState)
 		{
 		case PlayerState::MoveRight:
-			if (velocity.x > -10) pBody->ApplyLinearImpulseToCenter(b2Vec2(20, 0), 1);	// Force
-			pSprite.setTextureRect(sf::IntRect(0, 0, 10, 15));					// Visual
+			if (velocity.x > -1) pBody->ApplyLinearImpulseToCenter(b2Vec2(20, 0), 1);	// Force					
+			pSprite.setTextureRect(sf::IntRect(playerRect.width, playerRect.left, -playerRect.width, playerRect.height));
 			break;
 		case PlayerState::MoveLeft:
-			if (velocity.x < 10) pBody->ApplyLinearImpulseToCenter(b2Vec2(-20, 0), 1);
-			pSprite.setTextureRect(sf::IntRect(10, 0, -10, 15));
+			if (velocity.x < 1) pBody->ApplyLinearImpulseToCenter(b2Vec2(-20, 0), 1);
+			pSprite.setTextureRect(playerRect);
 			break;
 		case PlayerState::Jump:
 			if (onGround) pBody->ApplyLinearImpulseToCenter(b2Vec2(0, -240), 1);
