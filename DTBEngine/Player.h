@@ -4,6 +4,9 @@
 #include "AssetManager.h"
 #include "Animator.h"
 
+#define WALK_POWER 1.2f
+#define JUMP_POWER 3.32f
+
 enum PlayerState { 
 	Stay = 0,		// no move
 	MoveRight,		// moving right
@@ -27,26 +30,6 @@ class Player
 	float playerScale;			// player scale
 	sf::IntRect playerRect;		// player rect
 
-	// TESTING
-
-	void setWall(int x, int y, int w, int h)
-	{
-		b2PolygonShape gr;
-		gr.SetAsBox(w / SCALE, h / SCALE);
-
-		b2FixtureDef wallfdef;
-		wallfdef.friction = 0.3f;
-		wallfdef.density = 1.0f;
-		wallfdef.shape = &gr;
-
-		b2BodyDef bdef;
-		bdef.position.Set(x / SCALE, y / SCALE);
-
-		b2Body *body_gr = world->CreateBody(&bdef);
-		body_gr->CreateFixture(&wallfdef);
-		body_gr->SetUserData((void*)"wall");
-	}
-
 	void initModel()
 	{	
 		// -----Physics
@@ -60,10 +43,11 @@ class Player
 		pbdef.userData = (void*)"player";
 		pbdef.position.Set(spawnPoint.x, spawnPoint.y);
 		pbdef.fixedRotation = true;
+		pbdef.linearDamping = 3.1f;
+		pbdef.gravityScale = 1.5f;
 		
 		b2FixtureDef fdef;
-		fdef.density = 1.8f;
-		fdef.friction = 5.6f;
+		fdef.density = 8.0f;;
 
 		// Player shape setup
 
@@ -129,7 +113,12 @@ public:
 
 	void setStay() { currentState = PlayerState::Stay; }
 
-	void update(float deltaTime) // update gametick
+	void updateAnimation(sf::Time &time)
+	{
+
+	}
+
+	void update(sf::Time &deltaTime) // update gametick
 	{
 		bool onGround = false;
 		b2Vec2 pos = pBody->GetPosition();
@@ -143,15 +132,18 @@ public:
 		switch (currentState)
 		{
 		case PlayerState::MoveRight:
-			if (velocity.x > -1) pBody->ApplyLinearImpulseToCenter(b2Vec2(20, 0), 1);	// Force					
+			if (velocity.x < 1.1 * deltaTime.asMicroseconds()) pBody->ApplyForceToCenter(b2Vec2(WALK_POWER * deltaTime.asMicroseconds(), 0), 1);	// Force					
 			pSprite.setTextureRect(sf::IntRect(playerRect.width, playerRect.left, -playerRect.width, playerRect.height));
 			break;
 		case PlayerState::MoveLeft:
-			if (velocity.x < 1) pBody->ApplyLinearImpulseToCenter(b2Vec2(-20, 0), 1);
+			if (velocity.x > -1.1 * deltaTime.asMicroseconds()) pBody->ApplyForceToCenter(b2Vec2(-WALK_POWER * deltaTime.asMicroseconds(), 0), 1);
 			pSprite.setTextureRect(playerRect);
 			break;
 		case PlayerState::Jump:
-			if (onGround) pBody->ApplyLinearImpulseToCenter(b2Vec2(0, -240), 1);
+			if (onGround) pBody->ApplyForceToCenter(b2Vec2(0, -JUMP_POWER * deltaTime.asMicroseconds()), 1);
+			break;
+		case PlayerState::Stay:
+			//pBody->SetAngularDamping(0.5f);
 			break;
 		default:
 			break;

@@ -163,9 +163,11 @@
     <ClInclude Include="bin\ImGui\imstb_textedit.h" />
     <ClInclude Include="bin\ImGui\imstb_truetype.h" />
     <ClInclude Include="Constants.h" />
+    <ClInclude Include="Entity.h" />
     <ClInclude Include="libs.h" />
     <ClInclude Include="AssetManager.h" />
     <ClInclude Include="MathHelper.h" />
+    <ClInclude Include="Object.h" />
     <ClInclude Include="Player.h" />
   </ItemGroup>
   <ItemGroup>
